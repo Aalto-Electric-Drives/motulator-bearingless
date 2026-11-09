@@ -1,0 +1,108 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "motulator-bearingless"
+version = "0.1.0"
+dependencies = [
+    "motulator>=0.23.0,<0.24",
+    "motulator-multiphase>=0.1.0,<0.2",
+    "numpy",
+    "matplotlib",
+]
+requires-python = ">=3.12"
+authors = [
+    {name = "Marko Hinkkanen", email = "marko.hinkkanen@aalto.fi"}
+]
+description = "Six-phase bearingless machine drives for motulator"
+readme = "README.md"
+license = "MIT"
+keywords = [
+    "bearingless",
+    "control",
+    "converter",
+    "electric",
+    "machine",
+    "magnetic bearing",
+    "motor",
+    "multiphase",
+    "simulation",
+]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit",
+    "pyright",
+    "pytest",
+    "ruff",
+]
+doc = [
+    "myst-parser",
+    "numpydoc",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinx-book-theme",
+    "sphinx-copybutton",
+    "sphinx-gallery",
+    "sphinxcontrib-bibtex",
+]
+fem = [  # Finite-element dataset and the training of the networks, see fem/README.md
+    "motulator-gradnet",
+    "scipy",
+    "torch",
+]
+
+[project.urls]
+Homepage = "https://github.com/Aalto-Electric-Drives/motulator-bearingless"
+Documentation = "https://aalto-electric-drives.github.io/motulator-bearingless/"
+
+# The source distribution contains only the listed paths, in addition to pyproject.toml,
+# README.md, and LICENSE, which are always included
+[tool.hatch.build.targets.sdist]
+include = [
+    "/motulator_bearingless",
+    "/tests",
+    "/examples",
+    "/docs",
+    "/fem",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "PL", "UP"]
+ignore = ["PLR2004"]  # Ignore magic value warnings
+pylint = {max-args = 14}
+flake8-bugbear = {extend-immutable-calls = ["math.sqrt"]}
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "motulator_bearingless"]
+addopts = "--doctest-modules"
+
+[tool.pyright]
+include = ["motulator_bearingless", "tests", "examples"]
+venvPath = "."
+venv = ".venv"
+exclude = [
+    "**/__pycache__",
+    "**/.pytest_cache",
+]
+typeCheckingMode = "standard"

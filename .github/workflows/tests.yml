@@ -1,0 +1,49 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13', '3.14']
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v7
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install the package with the latest motulator
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev]
+    - name: Run tests
+      run: pytest
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.12'
+    - name: Build and check the wheel and the source distribution
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+        python -m build
+        twine check --strict dist/*
+    - name: Install the wheel and run the tests outside the repository
+      # The tests use the trained networks and the dataset of the examples and a script
+      # of the finite-element tools, which are not part of the wheel
+      run: |
+        pip install dist/*.whl pytest
+        mkdir "$RUNNER_TEMP/installed"
+        cp -r tests examples fem "$RUNNER_TEMP/installed/"
+        cd "$RUNNER_TEMP/installed"
+        python -m pytest tests --doctest-modules --pyargs motulator_bearingless

@@ -1,0 +1,47 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 50,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "nirangkush-das",
+      "name": "Nirangkush Das",
+      "avatar_url": "https://avatars.githubusercontent.com/u/206182092?v=4",
+      "profile": "https://github.com/nirangkush-das",
+      "contributions": [
+        "ideas",
+        "research"
+      ]
+    },
+    {
+      "login": "lefterisg4",
+      "name": "Eleftherios Kontodinas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43557907?v=4",
+      "profile": "https://github.com/lefterisg4",
+      "contributions": [
+        "ideas",
+        "research"
+      ]
+    },
+    {
+      "login": "mhinkkan",
+      "name": "Marko Hinkkanen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/76600872?v=4",
+      "profile": "https://research.aalto.fi/en/persons/marko-hinkkanen",
+      "contributions": [
+        "code",
+        "example"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "motulator-bearingless",
+  "projectOwner": "Aalto-Electric-Drives",
+  "commitType": "docs"
+}
