@@ -116,3 +116,7 @@ Complete examples, including current-based force control, levitation control, an
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
+## Acknowledgment
+
+This project has been sponsored by the Research Council of Finland through the *Centre of Excellence in High-Speed Electromechanical Energy Conversion Systems* and the Academy Project 355651.
