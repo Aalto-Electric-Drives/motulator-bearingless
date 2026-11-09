@@ -67,4 +67,23 @@ The unbalanced magnetic pull is a negative stiffness in the radial dynamics. A f
 
 ## Current-Based Force Control
 
-The {class}`motulator_bearingless.control.CurrentBasedForceController` class controls the four-pole plane by a vector controller of *motulator* with the equivalent three-phase machine. The radial force reference is converted to the current reference of the two-pole plane, which is current-controlled, in the same manner as the common and differential modes of multi-three-phase machines are controlled in *motulator-multiphase*.
+The {class}`motulator_bearingless.control.CurrentBasedForceControlSystem` class implements the classical current-based force control {cite}`Chiba2005`. It corresponds to the control principle of *motulator-multiphase*, where the common mode is controlled by a vector controller of a three-phase machine and the differential modes by current controllers, see {doc}`relation`. The four-pole plane is controlled by any synchronous-machine controller of *motulator*, e.g., {class}`motulator.drive.control.sm.CurrentVectorController` or {class}`motulator.drive.control.sm.FluxVectorController`, configured with the parameters of the equivalent three-phase machine, see {func}`motulator_bearingless.utils.fourpole_pars`. The feedback signals of the vector controller are the voltage of the four-pole plane and twice its current. The two-pole plane is current-controlled by {class}`motulator_bearingless.control.CurrentBasedForceController`, with the radial force reference converted to the current reference.
+
+Both planes rotate at $2\omegaM$ in stator coordinates, so that the natural common coordinates are those of the four-pole plane, $\vartheta_\mathrm{c} = 2\thetaM$, which the vector controller provides also in the sensorless mode. In these coordinates, the two-pole current $\ish{1}^\mathrm{c} = \e^{-\jj\vartheta_\mathrm{c}}\ish{1}^\mathrm{s} = \e^{-\jj\thetaM}\ish{1}$ is constant in the steady state, and the force in stator coordinates follows from the linear force model {eq}`force_complex` as
+
+```{math}
+---
+label: force_controller
+---
+    \fM^\mathrm{s} = 3\mathbf{k}\,(\ish{1}^\mathrm{c})^*
+```
+
+where $\mathbf{k}$ depends on the four-pole current in rotor coordinates, available from the vector controller as half of the current of the equivalent machine. The current reference of the two-pole plane is obtained by inverting {eq}`force_controller`,
+
+```{math}
+    \ish{1}^\mathrm{c,ref} = \left(\frac{\fM^\mathrm{s,ref}}{3\mathbf{k}}\right)^*
+```
+
+and no force can be produced if the machine is not magnetized ($\mathbf{k} = 0$). The current is controlled by a complex-vector PI controller in the flux-linkage form, $\boldsymbol{\uppsi}_1 = L_1\ish{1}^\mathrm{c}$, in coordinates rotating at $\omega_\mathrm{c} = 2\omegaM$ {cite}`Awa2019`, which is the controller of the differential modes in *motulator-multiphase*. The force estimate {eq}`force_controller` computed from the measured currents is fed to the levitation controller, as in direct force control. Since both planes rotate at $\omega_\mathrm{c}$ in stator coordinates, the voltage references of both planes are advanced by the same angle $k_\mathrm{comp}T_\mathrm{s}\omega_\mathrm{c}$ before the modulation, as in the vector control systems of *motulator*.
+
+Compared to {class}`motulator_multiphase.control.MultiThreePhaseControlSystem`, three changes are needed: the conjugate in {eq}`vsd_sets` (or, equivalently, the plane-specific rotation $h\thetaM$), the force-to-current conversion in place of the current-sharing references, and the current limit of the two-pole plane. With linear magnetics, the direct force control law reduces to this current-based law {cite}`Das2026`. The methods differ in the transients and in how the model nonlinearities and the displacement enter the control.

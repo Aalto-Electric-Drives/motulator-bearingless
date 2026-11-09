@@ -8,7 +8,7 @@ This package extends *motulator* with the continuous-time model of a symmetrical
 
 The magnetic models follow *motulator*: constant parameters, or gradient networks [[2]](#references) trained on the [finite-element data](https://aalto-electric-drives.github.io/motulator-bearingless/fem.html) of a 2.6-kW machine. The machine model uses an energy-based current map, with or without the spatial harmonics, and the controller a co-energy-based flux map without the rotor angle.
 
-For comparison, a current-based force controller is included as well: the four-pole plane is controlled by a vector controller of *motulator*, and the force reference is converted to the current reference of the two-pole plane, in the manner of the common and differential modes of *motulator-multiphase*, see the [relation between the packages](https://aalto-electric-drives.github.io/motulator-bearingless/relation.html).
+For comparison, a current-based force controller is included as well: the four-pole plane is controlled by a vector controller of *motulator*, and the force reference is converted to the current reference of the two-pole plane, in the manner of the common and differential modes of *motulator-multiphase*, see the [control methods](https://aalto-electric-drives.github.io/motulator-bearingless/control.html) and the [relation between the packages](https://aalto-electric-drives.github.io/motulator-bearingless/relation.html).
 
 ## Installation
 
