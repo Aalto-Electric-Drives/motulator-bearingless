@@ -3,11 +3,17 @@ Direct force control with different machine models and controller parametrizatio
 
 The rotor runs at the rated speed, driven externally, and it is held at a fixed radial
 position. After magnetization, radial force steps are applied, followed by a torque
-step, as in the simulations of Das et al. The errors of the radial force are computed
+step, as in the simulations of [#Das2026]_. The errors of the radial force are computed
 in the steady states and the rise time from the first force step. The results are
 printed as a table and saved to a json file.
 
 Usage: python compare_control.py out.json [case ...]
+
+References
+----------
+.. [#Das2026] Das, Martin, Kontodinas, Hinkkanen, "Direct force control of six-phase
+   bearingless synchronous machines," Proc. ICEM, 2026,
+   https://doi.org/10.1109/ICEM68283.2026.11757980
 
 """
 

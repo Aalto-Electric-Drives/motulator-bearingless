@@ -6,7 +6,7 @@ radial rotor displacement rule out any periodicity. The rotor center stays at th
 origin, and the stator is translated by `-q_M`, so that the torque integral refers to
 the rotor center.
 
-Conventions, as in Ahmed et al. (https://doi.org/10.1109/ECCE53617.2023.10361945):
+Conventions, as in [#Ahm2023]_:
 
 - Phase k has the magnetic axis at the mechanical angle `(k - 1)*60` deg for both the
   two-pole and four-pole components of its winding function. Each phase is a coil
@@ -21,6 +21,12 @@ Conventions, as in Ahmed et al. (https://doi.org/10.1109/ECCE53617.2023.10361945
 Boundary conditions: A = 0 on the outer surface of the stator. There is no other outer
 boundary: the shaft is a meshed part of the rotor, through which the two-pole flux can
 close.
+
+References
+----------
+.. [#Ahm2023] Ahmed, Martin, Das, Hinkkanen, "Analytical modeling of a six-phase
+   bearingless synchronous reluctance machine using winding function theory," Proc. IEEE
+   ECCE, 2023, https://doi.org/10.1109/ECCE53617.2023.10361945
 
 """
 
