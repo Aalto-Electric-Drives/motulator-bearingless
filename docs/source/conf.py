@@ -146,6 +146,10 @@ exclude_patterns = ["_build", "build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -----------------------------------------------------------
 
 html_theme = "sphinx_book_theme"
-html_theme_options = {"navigation_with_keys": False}
+html_theme_options = {
+    "repository_url": "https://github.com/Aalto-Electric-Drives/motulator-bearingless",
+    "use_repository_button": True,
+    "navigation_with_keys": False,
+}
 html_static_path = ["_static"]
 html_css_files = ["css/custom.css"]
