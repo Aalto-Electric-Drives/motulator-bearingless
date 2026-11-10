@@ -201,6 +201,34 @@ ax.legend()
 plt.show()
 
 # %%
+# The unbalanced magnetic pull at the rated peak current, at constant currents according
+# to the flux map and at constant flux linkages according to the current map. The flux
+# linkages are those of the finite-element model at a centric rotor. The pull is
+# destabilizing also at constant flux linkages, i.e., the energy is concave in the
+# displacement. Therefore, the current map represents the shifted energy
+# `W + k_q*abs(q_M)**2/2`, which is convex where `k_q` exceeds the stiffness of the pull
+# at constant currents.
+
+i_2 = 12 + 12j
+fem_0 = averaged((data["set"] == 2) & np.isclose(data["i_s2"], i_2), "psi_s2")
+_, _, f_psi = current_map(zeros, fem_0["psi_s2"][0] + zeros, q)
+f_i = est_par.f_M(zeros, i_2 + zeros, q)
+k_q = current_map.fcn.k_q * current_map.f_base / current_map.q_base
+m = fem_masks[ops.index(i_2)]
+
+fig, ax = plt.subplots()
+ax.plot(1e6 * np.real(fem["q_M"][m]), np.real(fem["f_M"][m]), ".", c="b")
+ax.plot(1e6 * q_i, np.real(f_i), c="b", label="Flux map (constant currents)")
+ax.plot(1e6 * q_i, np.real(f_psi), c="r", label="Current map (constant flux linkages)")
+ax.plot(1e6 * q_i, k_q * q_i, "--", c="m", label=r"$k_q q_\mathrm{M,i}$")
+ax.set_xlim(0, 400)
+ax.set_ylim(0, None)
+ax.set_xlabel(r"$q_\mathrm{M,i}$ (µm)")
+ax.set_ylabel(r"$f_\mathrm{M,i}$ (N)")
+ax.legend()
+plt.show()
+
+# %%
 # Characteristics of the flux map over the four-pole current at a centric rotor without
 # the two-pole current: the torque, the incremental inductance of the two-pole plane,
 # the slope of the radial force with respect to the two-pole current, and the stiffness
