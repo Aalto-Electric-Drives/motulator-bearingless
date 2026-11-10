@@ -39,22 +39,24 @@ par = model.BearinglessSynchronousMachinePars(
     R_s=0.215, L_1=0.03, L_d=0.03, L_q=0.01, m_d=10.0, m_q=0.2
 )
 machine = model.BearinglessSynchronousMachine(par)
+w_M_rated = 2 * pi * 1700 / 60
+k = 14.5 / w_M_rated**2  # Quadratic load torque, 14.5 Nm (rated) at the rated speed
+mechanics = model.MechanicalSystem(J=0.05, B_L=lambda w_M: k * abs(w_M))
 radial = model.ExternalRotorPosition()  # Fixed radial position
 converter = model.MultiThreePhaseConverter(u_dc=540)  # Two sets by default
-mdl = model.BearinglessDrive(machine, model.MechanicalSystem(J=0.15), radial, converter)
+mdl = model.BearinglessDrive(machine, mechanics, radial, converter)
 
 # Control system: the direct force controller and the speed controller
 cfg = control.DirectForceControllerCfg(i_s_max=25, psi_s_min=0.3, sensorless=True)
 force_ctrl = control.DirectForceController(par, cfg)
-speed_ctrl = control.SpeedController(J=0.15, alpha_s=2 * pi * 8)
+speed_ctrl = control.SpeedController(J=0.05, alpha_s=2 * pi * 4)
 ctrl = control.DirectForceControlSystem(force_ctrl, speed_ctrl)
 
-# Speed and force references and the load torque
-ctrl.set_speed_ref(lambda t: min(t / 1.2, 1) * 2 * pi * 1700 / 60)
-ctrl.set_force_ref(lambda t: (t > 1.6) * 100 + 1j * (t > 1.9) * 150)
-mdl.mechanics.set_external_load_torque(lambda t: (t > 2) * 10)
+# Speed and force references
+ctrl.set_speed_ref(lambda t: min(max(t - 0.2, 0) / 0.6, 1) * w_M_rated)
+ctrl.set_force_ref(lambda t: (t > 0.4) * 100 + 1j * (t > 0.6) * 150)
 
-res = model.Simulation(mdl, ctrl).simulate(t_stop=3)
+res = model.Simulation(mdl, ctrl).simulate(t_stop=1.2)
 utils.plot(res)
 ```
 

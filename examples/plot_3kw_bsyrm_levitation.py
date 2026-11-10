@@ -33,7 +33,9 @@ par = model.BearinglessSynchronousMachinePars(
 )
 m = 20.0
 machine = model.BearinglessSynchronousMachine(par)
-mechanics = model.MechanicalSystem(J=0.15)
+w_M_rated = 2 * pi * 1700 / 60
+k = nom.tau / w_M_rated**2  # Quadratic load torque, rated torque at the rated speed
+mechanics = model.MechanicalSystem(J=0.05, B_L=lambda w_M: k * abs(w_M))
 radial = model.RadialMechanics(m=m)
 converter = model.MultiThreePhaseConverter(u_dc=540)
 sensors = model.BearinglessDriveSensors(w_M=model.Sensor(), theta_M=model.Sensor())
@@ -46,40 +48,39 @@ mdl = model.BearinglessDrive(machine, mechanics, radial, converter, sensors)
 
 cfg = control.DirectForceControllerCfg(i_s_max=1.5 * base.i, psi_s_min=0.3)
 force_ctrl = control.DirectForceController(par, cfg)
-speed_ctrl = control.SpeedController(J=0.15, alpha_s=2 * pi * 8)
+speed_ctrl = control.SpeedController(J=0.05, alpha_s=2 * pi * 4)
 levitation_ctrl = control.LevitationController(
     m=m, alpha_q=2 * pi * 50, alpha_o=2 * pi * 150
 )
 ctrl = control.DirectForceControlSystem(force_ctrl, speed_ctrl, levitation_ctrl)
 
 # %%
-# Set the references and the external loads. The rotor is accelerated to the rated
-# speed of 1700 r/min. The gravity is applied as a step at t = 0.1 s in the negative
-# direction of the j axis. A displacement reference step of 50 µm is applied at
-# t = 1.4 s and a load torque step at t = 1.6 s.
+# Set the references and the external force. The machine is magnetized during the first
+# 0.2 s, after which the rotor is accelerated to the rated speed of 1700 r/min in 0.6 s
+# against the quadratic load torque. The gravity is applied as a step at t = 0.1 s in
+# the negative direction of the j axis, and a displacement reference step of 50 µm at
+# t = 1 s.
 
-w_M_rated = 2 * pi * 1700 / 60
-ctrl.set_speed_ref(lambda t: min(t / 1.2, 1) * w_M_rated)
-ctrl.set_displacement_ref(lambda t: (t > 1.4) * 50e-6)
+ctrl.set_speed_ref(lambda t: min(max(t - 0.2, 0) / 0.6, 1) * w_M_rated)
+ctrl.set_displacement_ref(lambda t: (t > 1) * 50e-6)
 radial.set_external_force(lambda t: (t > 0.1) * -9.81j * radial.m)
-mdl.mechanics.set_external_load_torque(lambda t: (t > 1.6) * 0.7 * nom.tau)
 
 # %%
 # Create the simulation object, simulate, and plot the results.
 
 sim = model.Simulation(mdl, ctrl)
-res = sim.simulate(t_stop=1.8)
+res = sim.simulate(t_stop=1.2)
 subplots = ["speed", "torque", "force", "displacement", "current"]
 f_lims = (-40.0, 450.0)  # Room for the legends
 utils.plot(
-    res, base, subplots, y_lims=[None, (-0.05, 1.625), f_lims, None, (-1.0, 0.9)]
+    res, base, subplots, y_lims=[None, (-0.05, 1.625), f_lims, None, (-1.3, 0.95)]
 )
 
 # %%
 # Plot the response to the gravity step and to the displacement reference step.
 
 utils.plot(res, base, ["force", "displacement"], t_lims=(0.08, 0.2), y_lims=[f_lims])
-utils.plot(res, base, ["force", "displacement"], t_lims=(1.38, 1.5), y_lims=[f_lims])
+utils.plot(res, base, ["force", "displacement"], t_lims=(0.98, 1.1), y_lims=[f_lims])
 
 # %%
 # .. rubric:: References

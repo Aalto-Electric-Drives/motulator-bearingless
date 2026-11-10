@@ -113,7 +113,7 @@ def make_drive(
     sensors = model.BearinglessDriveSensors(w_M=model.Sensor(), theta_M=model.Sensor())
     return model.BearinglessDrive(
         model.BearinglessSynchronousMachine(PAR),
-        model.MechanicalSystem(J=0.15),
+        model.MechanicalSystem(J=0.05),
         radial,
         model.MultiThreePhaseConverter(
             u_dc=540, modulator=model.CarrierComparison() if pwm else None
@@ -133,7 +133,7 @@ def make_ctrl(
     )
     return control.DirectForceControlSystem(
         control.DirectForceController(est_par, cfg),
-        control.SpeedController(J=0.15, alpha_s=2 * pi * 8),
+        control.SpeedController(J=0.05, alpha_s=2 * pi * 4),
         levitation_ctrl,
     )
 
@@ -159,7 +159,7 @@ def make_current_based_ctrl(
     return control.CurrentBasedForceControlSystem(
         vector_ctrl,
         control.CurrentBasedForceController(PAR, i_s1_max=5.0),
-        control.SpeedController(J=0.15, alpha_s=2 * pi * 8),
+        control.SpeedController(J=0.05, alpha_s=2 * pi * 4),
         levitation_ctrl,
     )
 
@@ -249,7 +249,7 @@ def test_discrete_current_based_force_control() -> None:
         return control.CurrentBasedForceControlSystem(
             control.CurrentVectorController(par_s2, cfg),
             control.CurrentBasedForceController(PAR, i_s1_max=5.0, T_s=T_s_force),
-            control.SpeedController(J=0.15, alpha_s=2 * pi * 8),
+            control.SpeedController(J=0.05, alpha_s=2 * pi * 4),
         )
 
     radial = model.ExternalRotorPosition()

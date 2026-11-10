@@ -692,7 +692,7 @@ def _plot_torques(ax, ctrl, mdl, base: BaseValues) -> None:
             ":",
             label=r"$\tau_\mathrm{L}^\mathrm{tot}$",
         )
-    ax.legend(loc="best")
+    ax.legend(loc="best", ncols=2)
 
 
 def _plot_flux_linkages(ax, ctrl, mdl, base: BaseValues) -> None:
@@ -718,7 +718,7 @@ def _plot_flux_linkages(ax, ctrl, mdl, base: BaseValues) -> None:
         "-.",
         label=r"$\psi_\mathrm{s1}$",
     )
-    ax.legend(loc="best")
+    ax.legend(loc="best", ncols=2)
     _, ymax = ax.get_ylim()
     ax.set_ylim(0, ymax)
 

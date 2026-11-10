@@ -35,7 +35,9 @@ par = model.BearinglessSynchronousMachinePars(
     R_s=0.215, L_1=0.03, L_d=0.03, L_q=0.01, m_d=10.0, m_q=0.2
 )
 machine = model.BearinglessSynchronousMachine(par)
-mechanics = model.MechanicalSystem(J=0.15)
+w_M_rated = 2 * pi * 1700 / 60
+k = nom.tau / w_M_rated**2  # Quadratic load torque, rated torque at the rated speed
+mechanics = model.MechanicalSystem(J=0.05, B_L=lambda w_M: k * abs(w_M))
 radial = model.ExternalRotorPosition()
 converter = model.MultiThreePhaseConverter(u_dc=540)
 mdl = model.BearinglessDrive(machine, mechanics, radial, converter)
@@ -59,17 +61,14 @@ vector_ctrl = control.CurrentVectorController(par_s2, cfg)
 force_ctrl = control.CurrentBasedForceController(
     par, alpha_c=2 * pi * 200, i_s1_max=0.5 * base.i
 )
-speed_ctrl = control.SpeedController(J=0.15, alpha_s=2 * pi * 8)
+speed_ctrl = control.SpeedController(J=0.05, alpha_s=2 * pi * 4)
 ctrl = control.CurrentBasedForceControlSystem(vector_ctrl, force_ctrl, speed_ctrl)
 
 # %%
-# Set the speed and force references and the external load torque, as in the direct
-# force control example.
+# Set the speed and force references as in the direct force control example.
 
-w_M_rated = 2 * pi * 1700 / 60
-ctrl.set_speed_ref(lambda t: min(t / 1.2, 1) * w_M_rated)
-ctrl.set_force_ref(lambda t: (t > 1.6) * 100 + 1j * (t > 1.9) * 150)
-mdl.mechanics.set_external_load_torque(lambda t: (t > 2) * 0.7 * nom.tau)
+ctrl.set_speed_ref(lambda t: min(max(t - 0.2, 0) / 0.6, 1) * w_M_rated)
+ctrl.set_force_ref(lambda t: (t > 0.4) * 100 + 1j * (t > 0.6) * 150)
 
 # %%
 # Create the simulation object, simulate, and plot the results. The two-pole current is
@@ -77,19 +76,17 @@ mdl.mechanics.set_external_load_torque(lambda t: (t > 2) * 0.7 * nom.tau)
 # state.
 
 sim = model.Simulation(mdl, ctrl)
-res = sim.simulate(t_stop=3)
-utils.plot(res, base)
+res = sim.simulate(t_stop=1.2)
+i_lims = (-1.0, 0.95)  # Room for the legends
+utils.plot(res, base, y_lims=[None, None, None, None, i_lims])
 
 # %%
-# Plot the response to the load torque step. The force depends on the product of the
-# two-pole and four-pole currents. The change of the four-pole current is compensated
-# for only via the current reference of the two-pole plane, which causes a transient in
-# the force.
+# Plot the force steps. At a constant four-pole current, the force is proportional to
+# the two-pole current, so that it follows its reference with the dynamics of the
+# current control of the two-pole plane.
 
-y_lims = [None, None, (-0.4, 1.25)]  # Room for the legends
-utils.plot(
-    res, base, ["torque", "force", "current"], t_lims=(1.95, 2.15), y_lims=y_lims
-)
+y_lims = [(-20.0, 260.0), i_lims]  # Room for the legends
+utils.plot(res, base, ["force", "current"], t_lims=(0.35, 0.65), y_lims=y_lims)
 print("Force at the end (N):", np.round(res.mdl.machine.f_M_ab[-1], 1))
 
 # %%
