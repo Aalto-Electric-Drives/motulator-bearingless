@@ -1,6 +1,6 @@
 # Finite-element model and gradient networks
 
-This folder contains the FEMM model of the 2.6-kW six-phase bearingless synchronous reluctance machine, the generation of the dataset, and the training of the gradient networks. The results are in `examples/datasets/` and `examples/trained_models/`, and they are used by the examples. The scripts need a built checkout of [femm-qt](https://github.com/mhinkkan/femm-qt), a cross-platform FEMM, whose path is given by `FEMM_QT` (defaults to `~/GitHub/femm-qt`), and the optional dependencies, `pip install -e .[fem]`.
+This folder contains the FEMM model of the 2.6-kW six-phase bearingless synchronous reluctance machine, the generation of the dataset, and the training of the gradient networks. The results are in `examples/datasets/` and `examples/trained_models/`, and they are used by the examples. The scripts need [femm-qt](https://github.com/dcm3c/femm-qt), the cross-platform FEMM 5.0, and its Python interface in the same environment, installed from the femm-qt checkout with `pip install -e pyfemm` (not the `pyfemm` package of FEMM 4.2), as well as the optional dependencies, `pip install -e .[fem]`. The Python interface finds `femm_headless` in the build directory of the checkout, in the directory given by `FEMM_DIR`, or on `PATH`.
 
 ## Machine
 

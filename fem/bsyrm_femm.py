@@ -25,18 +25,13 @@ close.
 """
 
 import os
-import sys
 import tempfile
 from dataclasses import dataclass, field
 
+import femm
 import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import brentq, least_squares
-
-FEMM_QT = os.environ.get("FEMM_QT", os.path.expanduser("~/GitHub/femm-qt"))
-sys.path.insert(0, FEMM_QT + "/pyfemm")
-os.environ.setdefault("FEMM_DIR", FEMM_QT + "/build/bin")
-import femm  # noqa: E402
 
 ALPHA = np.exp(1j * np.pi / 3)
 DEG = np.pi / 180
