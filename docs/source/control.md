@@ -46,25 +46,6 @@ The four-pole plane is controlled in the same manner as in flux-vector control. 
 
 The stator flux linkages are estimated by {class}`motulator_bearingless.control.FluxObserver` in rotor coordinates, based on the voltage model, corrected by the flux map of the machine {cite}`Das2026`. In the sensorless mode, also the rotor angle and the rotor speed are estimated, as in {cite}`Hin2018`.
 
-```{note}
-The sensorless mode with a speed controller is sensitive to the errors of the control model at no load. A limit cycle in the torque and the q-axis current appears already with an overestimation of about 10 % in the d-axis inductance, and with the mismatch between the current map and the flux map, while the operation is stable with the measured speed and angle, with a torque reference instead of the speed controller, and under load. The flux-vector controller of *motulator* behaves similarly in the same conditions. Therefore, the examples with the gradient-network maps use the measured speed and angle, as in {cite}`Das2026`.
-```
-
-## Levitation Control
-
-The {class}`motulator_bearingless.control.LevitationController` class gives the force reference from a state feedback law based on the estimates of a disturbance observer
-
-```{math}
----
-label: levitation
----
-    \fM^\mathrm{s,ref} = m\left[\alpha_q^2(\qM^\mathrm{s,ref} - \hat{\qM}^\mathrm{s}) - 2\alpha_q\hat{\vM}^\mathrm{s}\right] - \hat{\mathbf{f}}_\mathrm{ext}^\mathrm{s}
-```
-
-which results in the double closed-loop pole at $s = -\alpha_q$. The observer is driven by the radial force estimate, so that the dynamics and the limits of the inner force control loop do not cause windup.
-
-The unbalanced magnetic pull is a negative stiffness in the radial dynamics. A flux map includes it in the force estimate. The constant parameters omit it, leaving the pull for the disturbance observer. Consider one axis in continuous time, with an ideal inner force control loop and a constant stiffness of the pull at constant currents. With $\alpha_\mathrm{o} = 3\alpha_q$, the closed-loop poles then stay in the left half-plane only if the stiffness is below $1.39\,m\alpha_q^2$, which limits the minimum bandwidth of the constant-parameter controller. The limit grows with the ratio $\alpha_\mathrm{o}/\alpha_q$, and the dynamics of the inner loop and the sampling change it.
-
 ## Current-Based Force Control
 
 The {class}`motulator_bearingless.control.CurrentBasedForceControlSystem` class implements the classical current-based force control {cite}`Chiba2005`. It corresponds to the control principle of *motulator-multiphase*, where the common mode is controlled by a vector controller of a three-phase machine and the differential modes by current controllers, see {doc}`relation`. The four-pole plane is controlled by any synchronous-machine controller of *motulator*, e.g., {class}`motulator.drive.control.sm.CurrentVectorController` or {class}`motulator.drive.control.sm.FluxVectorController`, configured with the parameters of the equivalent three-phase machine, see {func}`motulator_bearingless.utils.fourpole_pars`. The feedback signals of the vector controller are the voltage of the four-pole plane and twice its current. The two-pole plane is current-controlled by {class}`motulator_bearingless.control.CurrentBasedForceController`, with the radial force reference converted to the current reference.
@@ -87,3 +68,18 @@ where $\mathbf{k}$ depends on the four-pole current in rotor coordinates, availa
 and no force can be produced if the machine is not magnetized ($\mathbf{k} = 0$). The current is controlled by a complex-vector PI controller in the flux-linkage form, $\boldsymbol{\uppsi}_1 = L_1\ish{1}^\mathrm{c}$, in coordinates rotating at $\omega_\mathrm{c} = 2\omegaM$ {cite}`Awa2019`, which is the controller of the differential modes in *motulator-multiphase*. The force estimate {eq}`force_controller` computed from the measured currents is fed to the levitation controller, as in direct force control. Since both planes rotate at $\omega_\mathrm{c}$ in stator coordinates, the voltage references of both planes are advanced by the same angle $k_\mathrm{comp}T_\mathrm{s}\omega_\mathrm{c}$ before the modulation, as in the vector control systems of *motulator*.
 
 Compared to {class}`motulator_multiphase.control.MultiThreePhaseControlSystem`, three changes are needed: the conjugate in {eq}`vsd_sets` (or, equivalently, the plane-specific rotation $h\thetaM$), the force-to-current conversion in place of the current-sharing references, and the current limit of the two-pole plane. With linear magnetics, the direct force control law reduces to this current-based law {cite}`Das2026`. The methods differ in the transients and in how the model nonlinearities and the displacement enter the control.
+
+## Levitation Control
+
+The {class}`motulator_bearingless.control.LevitationController` class gives the force reference from a state feedback law based on the estimates of a disturbance observer
+
+```{math}
+---
+label: levitation
+---
+    \fM^\mathrm{s,ref} = m\left[\alpha_q^2(\qM^\mathrm{s,ref} - \hat{\qM}^\mathrm{s}) - 2\alpha_q\hat{\vM}^\mathrm{s}\right] - \hat{\mathbf{f}}_\mathrm{ext}^\mathrm{s}
+```
+
+which results in the double closed-loop pole at $s = -\alpha_q$. The observer is driven by the radial force estimate, so that the dynamics and the limits of the inner force control loop do not cause windup.
+
+The unbalanced magnetic pull is a negative stiffness in the radial dynamics. A flux map includes it in the force estimate. The constant parameters omit it, leaving the pull for the disturbance observer. Consider one axis in continuous time, with an ideal inner force control loop and a constant stiffness of the pull at constant currents. With $\alpha_\mathrm{o} = 3\alpha_q$, the closed-loop poles then stay in the left half-plane only if the stiffness is below $1.39\,m\alpha_q^2$, which limits the minimum bandwidth of the constant-parameter controller. The limit grows with the ratio $\alpha_\mathrm{o}/\alpha_q$, and the dynamics of the inner loop and the sampling change it.
