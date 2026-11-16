@@ -372,7 +372,7 @@ class ForceDisturbanceObserver:
 
 
 # %%
-@dataclass
+@dataclass(kw_only=True)
 class DirectForceControllerCfg:
     """
     Direct force controller configuration.
@@ -758,14 +758,6 @@ class BearinglessControlSystem[Ref: BaseReferences, Fbk](
     def get_command(self, ref: Ref) -> tuple[float, Sequence[float]]:
         """Extract the sampling period and the duty ratios from the references."""
         return ref.T_s, ref.d_abc
-
-    def compute_standby_output(self, fbk: Fbk) -> Ref:
-        """Compute the controller output while the gates are blocked."""
-        # The multi-three-phase converter model does not support gate blocking. The
-        # message is a separate statement, so that the method is not documented as an
-        # abstract method.
-        msg = "Bearingless control does not support gate blocking"
-        raise NotImplementedError(msg)
 
     def _realized_voltages(
         self, meas: Measurements, average: bool
