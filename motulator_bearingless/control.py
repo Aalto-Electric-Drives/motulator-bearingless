@@ -760,14 +760,19 @@ class BearinglessControlSystem[Ref: BaseReferences, Fbk](
         return ref.T_s, ref.d_abc
 
     def _realized_voltages(
-        self, meas: Measurements, average: bool
-    ) -> tuple[complex, complex]:
-        """Realized voltages of the two planes in stator coordinates."""
-        u_c_ab = [
-            pwm.get_realized_voltage(i, meas.u_dc, average=average)
-            for pwm, i in zip(self.pwms, meas.i_c_ab, strict=True)
-        ]
-        return vsd(*u_c_ab)
+        self, meas: Measurements
+    ) -> tuple[tuple[complex, complex], tuple[complex, complex]]:
+        """Realized voltages of the two planes in stator coordinates, those of the
+        ongoing sampling period and those averaged over the previous and ongoing
+        periods."""
+        u_zoh, u_c_ab = zip(
+            *(
+                pwm.get_realized_voltages(i, meas.u_dc)
+                for pwm, i in zip(self.pwms, meas.i_c_ab, strict=True)
+            ),
+            strict=True,
+        )
+        return vsd(*u_zoh), vsd(*u_c_ab)
 
     def _compute_torque_ref(self, w_M: float) -> tuple[float | None, float]:
         """Speed reference (None in torque-control mode) and torque reference."""
@@ -839,15 +844,14 @@ class DirectForceControlSystem(BearinglessControlSystem[References, Feedbacks]):
 
     def get_feedback(self, meas: Measurements) -> Feedbacks:
         """Get the feedback signals."""
-        u_s1_ab, u_s2_ab = self._realized_voltages(meas, average=True)
+        (u_s1_zoh, u_s2_zoh), (u_s1_ab, u_s2_ab) = self._realized_voltages(meas)
         i_s1_ab, i_s2_ab = vsd(*meas.i_c_ab)
         fbk = self.force_ctrl.get_feedback(
             u_s1_ab, u_s2_ab, i_s1_ab, i_s2_ab, meas.w_M, meas.theta_M, meas.q_M_ab
         )
         # Voltages of the ongoing sampling period for the flux observer
-        u_s1_ab, u_s2_ab = self._realized_voltages(meas, average=False)
-        fbk.u_s1_zoh = exp(-1j * fbk.theta_M) * u_s1_ab
-        fbk.u_s2_zoh = exp(-2j * fbk.theta_M) * u_s2_ab
+        fbk.u_s1_zoh = exp(-1j * fbk.theta_M) * u_s1_zoh
+        fbk.u_s2_zoh = exp(-2j * fbk.theta_M) * u_s2_zoh
         fbk.u_dc = meas.u_dc
         fbk.q_M_ab = meas.q_M_ab
         if self.levitation_ctrl is not None:
@@ -1136,8 +1140,7 @@ class CurrentBasedForceControlSystem(
         i_s1_ab, i_s2_ab = vsd(*meas.i_c_ab)
         # The observer uses the voltage of the ongoing sampling period, while the
         # control laws use the voltage averaged over the previous and ongoing periods
-        _, u_s2_ab_zoh = self._realized_voltages(meas, average=False)
-        u_s1_ab, u_s2_ab = self._realized_voltages(meas, average=True)
+        (_, u_s2_ab_zoh), (u_s1_ab, u_s2_ab) = self._realized_voltages(meas)
         # The equivalent machine of the four-pole plane carries the sum of the set
         # currents. The rotor speed and angle are not used in the sensorless mode.
         if self.vector_ctrl.sensorless:

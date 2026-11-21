@@ -39,7 +39,7 @@ from motulator.drive.model import (
 )
 from motulator_multiphase.model import MultiThreePhaseConverter
 
-from motulator_bearingless._helpers import empty_array, get_value, wrap
+from motulator_bearingless._helpers import empty_array, get_value
 from motulator_bearingless.utils import (
     BaseBearinglessMachinePars,
     BearinglessSynchronousMachinePars,
@@ -129,6 +129,7 @@ class BearinglessSynchronousMachine(Subsystem):
 
     # The currents depend directly on the rotor displacement
     feedthrough = frozenset({"q_M_ab"})
+    angles = frozenset({"theta_M"})
 
     def __init__(self, par: BaseBearinglessMachinePars) -> None:
         self.par = par
@@ -150,14 +151,6 @@ class BearinglessSynchronousMachine(Subsystem):
         i_c_ab = np.array(inv_vsd(i_s1_ab, i_s2_ab))
         f_M_ab = exp_j_theta_M * f_M_dq
         return i_c_ab, i_s1_ab, i_s2_ab, tau_M, f_M_ab
-
-    def set_states(self, state_list: list[complex], index: int) -> int:
-        """Set states, keeping the rotor angle within [-pi, pi)."""
-        # The angle is wrapped only in the state of the model, which the next
-        # integration interval starts from, so the solver sees no discontinuity
-        index = super().set_states(state_list, index)
-        self.state.theta_M = wrap(self.state.theta_M.real)
-        return index
 
     def set_outputs(self, t: float) -> None:
         """Set output variables."""
@@ -408,7 +401,7 @@ class BearinglessDriveSensors(DriveSensors):
     q_M: Sensor = field(default_factory=Sensor)
 
 
-class BearinglessDrive(Model[MultiThreePhaseConverter]):
+class BearinglessDrive[M: Subsystem](Model[MultiThreePhaseConverter]):
     """
     Continuous-time system model of a six-phase bearingless machine drive.
 
@@ -416,8 +409,11 @@ class BearinglessDrive(Model[MultiThreePhaseConverter]):
     ----------
     machine : BearinglessSynchronousMachine
         Machine model.
-    mechanics : MechanicalSystem | TwoMassMechanicalSystem | ExternalRotorSpeed
-        Rotational mechanics.
+    mechanics : Subsystem
+        Rotational mechanics, e.g., `MechanicalSystem`. It can be any subsystem whose
+        input is the electromagnetic torque `tau_M` and whose outputs are the mechanical
+        angular speed `w_M` and, with a position sensor, the mechanical angle `theta_M`
+        of the rotor.
     radial : ExternalRotorPosition | RadialMechanics
         Radial mechanics.
     converter : MultiThreePhaseConverter
@@ -432,7 +428,7 @@ class BearinglessDrive(Model[MultiThreePhaseConverter]):
     def __init__(
         self,
         machine: BearinglessSynchronousMachine,
-        mechanics: MechanicalSystem | TwoMassMechanicalSystem | ExternalRotorSpeed,
+        mechanics: M,
         radial: ExternalRotorPosition | RadialMechanics,
         converter: MultiThreePhaseConverter,
         sensors: BearinglessDriveSensors | None = None,

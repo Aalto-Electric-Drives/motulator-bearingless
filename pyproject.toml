@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "motulator-bearingless"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
-    "motulator>=0.25.0,<0.26",
-    "motulator-multiphase>=0.1.2,<0.2",
+    "motulator>=0.26.0,<0.27",
+    "motulator-multiphase>=0.1.3,<0.2",
     "numpy",
     "matplotlib",
 ]

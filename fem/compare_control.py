@@ -104,8 +104,7 @@ def machine_model(name: str) -> Any:
 def run(case: Case) -> dict:
     """Simulate a case and compute its metrics."""
     machine = model.BearinglessSynchronousMachine(machine_model(case.plant))
-    mechanics = model.ExternalRotorSpeed()
-    mechanics.set_external_rotor_speed(case.w_M)
+    mechanics = model.ExternalRotorSpeed(case.w_M)
     radial = model.ExternalRotorPosition()
     q_M = complex(case.q_M)
     radial.set_external_displacement(q_M)
@@ -171,8 +170,7 @@ def run_levitation(ctrl_name: str, plant: str, f_q: float, f_o: float) -> dict:
     """
     m_r = 20.0  # Rotor mass (kg), that of the levitation examples
     machine = model.BearinglessSynchronousMachine(machine_model(plant))
-    mechanics = model.ExternalRotorSpeed()
-    mechanics.set_external_rotor_speed(W_M)
+    mechanics = model.ExternalRotorSpeed(W_M)
     radial = model.RadialMechanics(m=m_r)
     radial.set_external_force(lambda t: (t > 0.1) * -9.81j * m_r)
     converter = model.MultiThreePhaseConverter(u_dc=U_DC)
