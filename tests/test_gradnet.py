@@ -412,8 +412,7 @@ def test_four_pole_plane_of_trained_flux_map() -> None:
 def _simulate(par_machine, par_ctrl, t_stop: float):
     """Direct force control at a fixed rotor speed with a force reference step."""
     machine = system.BearinglessSynchronousMachine(par_machine)
-    mechanics = system.ExternalRotorSpeed()
-    mechanics.set_external_rotor_speed(2 * np.pi * 1700 / 60)
+    mechanics = system.ExternalRotorSpeed(2 * np.pi * 1700 / 60)
     radial = system.ExternalRotorPosition()
     converter = system.MultiThreePhaseConverter(u_dc=540)
     sensors = system.BearinglessDriveSensors(

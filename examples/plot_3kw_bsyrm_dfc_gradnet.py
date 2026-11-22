@@ -63,9 +63,9 @@ ctrl = control.DirectForceControlSystem(force_ctrl, speed_ctrl)
 # %%
 # Visualize the control loci of the four-pole plane.
 
-mc = utils.MachineCharacteristics(utils.fourpole_pars(est_par))
-mc.plot_current_loci([1, 1.5], base)
-mc.plot_flux_loci([1, 1.5], base)
+mc = utils.MachineCharacteristics(utils.fourpole_pars(est_par), [1, 1.5], base)
+mc.plot_current_loci()
+mc.plot_flux_loci()
 
 # %%
 # Set the speed and force references. The machine is magnetized during the first 0.2 s,

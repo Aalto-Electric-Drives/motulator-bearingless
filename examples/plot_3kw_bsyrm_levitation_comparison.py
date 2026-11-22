@@ -67,8 +67,7 @@ t_stop = 0.6
 def simulate(par_c: control.BearinglessMagneticModel):
     """Simulate the drive with the given control model."""
     machine = model.BearinglessSynchronousMachine(par)
-    mechanics = model.ExternalRotorSpeed()
-    mechanics.set_external_rotor_speed(w_M_rated)
+    mechanics = model.ExternalRotorSpeed(w_M_rated)
     radial = model.RadialMechanics(m=m)
     radial.set_external_force(lambda t: (t > 0.1) * -9.81j * m)
     converter = model.MultiThreePhaseConverter(u_dc=540)
